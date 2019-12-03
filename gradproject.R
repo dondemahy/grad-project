@@ -2,6 +2,7 @@ library(readr)
 library(stringr)
 library(dplyr)
 library(ggplot2)
+library(tidyverse)
 
 #reading in dataframes
 labo.prime<-read_csv("labo database malaria.csv")
@@ -70,6 +71,14 @@ order.merge<-order.merge[order(order.merge$BandNumber),]
 #merging order.merge and order.labo
 merge.prime<-merge(order.merge,order.labo,by="BandNumber")
 
-#graphing order.merge
-ggplot(data=order.merge,aes(variable,value))+geom_bar(stat="identity")+
-  facet_grid(tow~Region,labeller=label_both)+scale_y_log10()
+#graphing merge.prime
+merge.prime<- merge.prime %>% rename(Malaria=Results)
+graph<-function(x,y){
+  ggplot(data=merge.prime,aes(x=x))+geom_bar(position="stack",aes(fill=Malaria))+
+    ggtitle(y)+ylab("")+theme_classic()+
+    theme(plot.title = element_text(hjust = 0.5))+xlab("")
+}
+ggplot(data=merge.prime,aes(x=Weight))+geom_histogram(position="stack",aes(fill=Malaria))+
+  ggtitle("Malaria Status by Age")+ylab("")+theme_classic()+
+  theme(plot.title = element_text(hjust = 0.5))
+graph(merge.prime$BP,"Brood Patch")

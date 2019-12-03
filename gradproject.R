@@ -1,6 +1,7 @@
 library(readr)
 library(stringr)
 library(dplyr)
+library(ggplot2)
 
 #reading in dataframes
 labo.prime<-read_csv("labo database malaria.csv")
@@ -30,10 +31,6 @@ w.blood<-t2.blood[t2.blood$test==FALSE,]
 w2.blood<-w.blood$BandNumbers
 new.blood<-blood.prime[blood.prime$BandNumber %in% w2.blood,]
 
-#comparing band numbers between new.blood and blood.labo
-bledbands<-new.blood$BandNumber
-matched.labo<-blood.labo[blood.labo$BandNumber %in% bledbands,]
-
 #cleaning PCR.prime
 PCR.prime$TakeOrLeave<-NA
 test<-function(x)ifelse(test=str_detect(x,"SMD"),yes="take",no="leave")
@@ -52,10 +49,27 @@ for(i in 1:nrow(new.PCR)){
     new.PCR[i,]$FieldCode<-str_c(new.PCR[i,]$FieldPrefix,new.PCR[i,]$FieldID,sep="0")}
 }
 new.PCR<-new.PCR[1:540,]
+new.PCR<-new.PCR[c(1:354,399:540),]
 
 #comparing field codes between new.PCR and new.blood
 analyzedblood<-new.PCR$FieldCode
 matched.blood<-new.blood[new.blood$FieldCode %in% analyzedblood,]
 
 #merging new.PCR and matched.blood
-testmerge<-merge(matched.blood,new.PCR)
+order.blood<-matched.blood[order(matched.blood$FieldCode),]
+order.PCR<-new.PCR[order(new.PCR$FieldCode),]
+testmerge<-merge(order.blood,order.PCR)
+order.merge<-testmerge[order(testmerge$FieldCode),]
+
+#comparing band numbers between order.merge and blood.labo
+bledbands<-order.merge$BandNumber
+matched.labo<-blood.labo[blood.labo$BandNumber %in% bledbands,]
+order.labo<-matched.labo[order(matched.labo$BandNumber),]
+order.merge<-order.merge[order(order.merge$BandNumber),]
+
+#merging order.merge and order.labo
+merge.prime<-merge(order.merge,order.labo,by="BandNumber")
+
+#graphing order.merge
+ggplot(data=order.merge,aes(variable,value))+geom_bar(stat="identity")+
+  facet_grid(tow~Region,labeller=label_both)+scale_y_log10()

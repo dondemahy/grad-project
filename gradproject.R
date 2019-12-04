@@ -2,11 +2,11 @@
 
 library(readr)
 library(stringr)
-library(dplyr)
 library(ggplot2)
 library(tidyverse)
 library(reshape2)
 library(plyr)
+library(dplyr)
 
 #reading in dataframes
 
@@ -84,7 +84,7 @@ order.merge<-order.merge[order(order.merge$BandNumber),]
 #merging order.merge and order.labo
 
 merge.prime<-merge(order.merge,order.labo,by="BandNumber")
-merge.prime<- merge.prime %>% rename(Malaria=Results)
+merge.prime<- merge.prime %>% dplyr::rename(Malaria=Results)
 
 #cleaning and saving final dataset
 
@@ -117,9 +117,7 @@ ddply(.data=bar.melt,.variables=c("variable"),function(x){
     ggtitle(unique(x))+ylab("")+theme_classic()+
     theme(plot.title = element_text(hjust = 0.5))+xlab("")
   
-  ggsave(filename = paste0('birdgraphs/',unique(x$variable),'.png'),
-         width = 4, height = 3, units = 'in',
-         dpi = 300)
+  ggsave(filename = paste0('birdgraphs/',unique(x$variable)),device='png') 
 })
 
 ddply(.data=hist.melt,.variables=c("variable"),function(x){
@@ -128,7 +126,5 @@ ddply(.data=hist.melt,.variables=c("variable"),function(x){
     ggtitle(unique(x))+ylab("")+theme_classic()+
     theme(plot.title = element_text(hjust = 0.5))+xlab("")
   
-  ggsave(filename = paste0('birdgraphs/',unique(x$variable),'.png'),
-         width = 4, height = 3, units = 'in',
-         dpi = 300)
+  ggsave(filename = paste0('birdgraphs/',unique(x$variable)),device="png")
 })
